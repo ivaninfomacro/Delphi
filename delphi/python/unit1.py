@@ -6,7 +6,6 @@ code is easy to compare and maintain.
 """
 
 import tkinter as tk
-from tkinter import ttk
 
 
 class CalculatorForm:
@@ -14,7 +13,13 @@ class CalculatorForm:
 
     def __init__(self, master: tk.Tk) -> None:
         self.master = master
-        self.master.title("Calculator")
+        self.master.title("The Best Calculator Ever")
+        self.master.geometry("336x492")
+        self.master.resizable(False, False)
+
+        # Match the Delphi look with bold Segoe UI styling.
+        self.button_font = ("Segoe UI", 20, "bold")
+        self.screen_font = ("Segoe UI", 20, "bold")
 
         # State variables mimic the Delphi globals.
         self.first: float = 0.0
@@ -27,41 +32,59 @@ class CalculatorForm:
 
     # UI construction -----------------------------------------------------
     def _build_layout(self) -> None:
-        """Create the calculator layout with buttons similar to the Delphi form."""
+        """Create the calculator layout with buttons mirroring the Delphi form."""
 
-        screen_entry = ttk.Entry(self.master, textvariable=self.screen_var, justify="right", font=("Segoe UI", 18))
-        screen_entry.grid(row=0, column=0, columnspan=4, sticky="nsew", padx=5, pady=5)
+        layout = tk.Frame(self.master)
+        layout.grid(row=0, column=0, sticky="nsew")
 
-        # Number buttons laid out like the original grid.
-        numbers = [
-            ("7", 1, 0), ("8", 1, 1), ("9", 1, 2),
-            ("4", 2, 0), ("5", 2, 1), ("6", 2, 2),
-            ("1", 3, 0), ("2", 3, 1), ("3", 3, 2),
-            ("0", 4, 0),
-        ]
+        # Screen at the top spans all columns and uses a dark background like the DFM.
+        screen_entry = tk.Entry(
+            layout,
+            textvariable=self.screen_var,
+            justify="right",
+            font=self.screen_font,
+            bg="black",
+            fg="white",
+            insertbackground="white",
+        )
+        screen_entry.grid(row=0, column=0, columnspan=4, sticky="nsew", padx=8, pady=(8, 4), ipady=10)
 
-        for label, row, col in numbers:
-            ttk.Button(self.master, text=label, command=lambda value=label: self.number_button_click(value)).grid(
-                row=row, column=col, sticky="nsew", padx=2, pady=2
+        def add_button(text: str, row: int, column: int, command, columnspan: int = 1) -> None:
+            tk.Button(layout, text=text, font=self.button_font, command=command).grid(
+                row=row, column=column, columnspan=columnspan, sticky="nsew", padx=4, pady=4
             )
 
-        # Operation buttons mirror the Delphi caption names.
-        ttk.Button(self.master, text="+", command=self.plus_button_click).grid(row=1, column=3, sticky="nsew", padx=2, pady=2)
-        ttk.Button(self.master, text="-", command=self.minus_button_click).grid(row=2, column=3, sticky="nsew", padx=2, pady=2)
-        ttk.Button(self.master, text="*", command=self.mult_button_click).grid(row=3, column=3, sticky="nsew", padx=2, pady=2)
-        ttk.Button(self.master, text="/", command=self.div_button_click).grid(row=4, column=3, sticky="nsew", padx=2, pady=2)
+        # Top row: clear, backspace, divide.
+        add_button("clear", 1, 0, self.clear_button_click, columnspan=2)
+        add_button("⌫", 1, 2, self.back_button_click)
+        add_button("/", 1, 3, self.div_button_click)
 
-        ttk.Button(self.master, text="=", command=self.equals_button_click).grid(row=4, column=2, sticky="nsew", padx=2, pady=2)
-        ttk.Button(self.master, text=".", command=self.decimal_button_click).grid(row=4, column=1, sticky="nsew", padx=2, pady=2)
-        ttk.Button(self.master, text="+/-", command=self.sign_button_click).grid(row=5, column=0, sticky="nsew", padx=2, pady=2)
-        ttk.Button(self.master, text="C", command=self.clear_button_click).grid(row=5, column=1, sticky="nsew", padx=2, pady=2)
-        ttk.Button(self.master, text="⌫", command=self.back_button_click).grid(row=5, column=2, sticky="nsew", padx=2, pady=2)
+        # Number rows.
+        add_button("7", 2, 0, lambda: self.number_button_click("7"))
+        add_button("8", 2, 1, lambda: self.number_button_click("8"))
+        add_button("9", 2, 2, lambda: self.number_button_click("9"))
+        add_button("*", 2, 3, self.mult_button_click)
 
-        # Make the grid responsive.
+        add_button("4", 3, 0, lambda: self.number_button_click("4"))
+        add_button("5", 3, 1, lambda: self.number_button_click("5"))
+        add_button("6", 3, 2, lambda: self.number_button_click("6"))
+        add_button("-", 3, 3, self.minus_button_click)
+
+        add_button("1", 4, 0, lambda: self.number_button_click("1"))
+        add_button("2", 4, 1, lambda: self.number_button_click("2"))
+        add_button("3", 4, 2, lambda: self.number_button_click("3"))
+        add_button("+", 4, 3, self.plus_button_click)
+
+        add_button("±", 5, 0, self.sign_button_click)
+        add_button("0", 5, 1, lambda: self.number_button_click("0"))
+        add_button(".", 5, 2, self.decimal_button_click)
+        add_button("=", 5, 3, self.equals_button_click)
+
+        # Keep proportions close to the Delphi layout: four equal columns and rows.
         for col in range(4):
-            self.master.columnconfigure(col, weight=1)
-        for row in range(6):
-            self.master.rowconfigure(row, weight=1)
+            layout.columnconfigure(col, minsize=80, weight=1)
+        for row in range(1, 6):
+            layout.rowconfigure(row, minsize=78, weight=1)
 
     # Core logic ----------------------------------------------------------
     def _calculate(self) -> None:
