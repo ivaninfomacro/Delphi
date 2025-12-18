@@ -2,7 +2,7 @@
 
 import tkinter as tk
 
-from unit1 import CalculatorForm
+from .unit1 import CalculatorForm
 
 
 def main() -> None:
