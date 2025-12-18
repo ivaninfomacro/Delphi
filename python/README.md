@@ -9,9 +9,18 @@ This folder mirrors the Delphi VCL sample (`Project1.dpr` / `Unit1.pas`) using T
 
 ## Run it
 ```bash
-cd delphi
+# from the repository root (the folder that contains both `delphi/` and `python/`)
 python -m python.project1
 # or simply
+python -m python
+```
+
+If you see `No module named python` or `No module named python.__main__`, you are probably
+inside the `delphi/` subfolder. Go up one level so the `python/` package is on the module
+search path, then rerun the command. On Windows that usually looks like:
+
+```cmd
+cd ..
 python -m python
 ```
 
